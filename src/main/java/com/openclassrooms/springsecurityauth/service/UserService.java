@@ -1,23 +1,20 @@
-package com.openclassrooms.springsecurityauth.service;
+package com.openclassrooms.springsecurityauth.service; // 1. Déclaration de package
 
-import com.openclassrooms.springsecurityauth.model.User;
-import com.openclassrooms.springsecurityauth.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.openclassrooms.springsecurityauth.model.User; // 2. Import de la classe User
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserService {
+public class UserService { 
 
-    @Autowired
-    private UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public User registerUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        String encryptedPassword = passwordEncoder.encode(user.getPassword());
+        return new User(user.getEmail(), encryptedPassword, user.getname());
     }
-
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
 }
