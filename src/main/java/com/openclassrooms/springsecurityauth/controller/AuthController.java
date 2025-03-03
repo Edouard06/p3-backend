@@ -2,31 +2,33 @@ package com.openclassrooms.springsecurityauth.controller;
 
 import com.openclassrooms.springsecurityauth.model.User;
 import com.openclassrooms.springsecurityauth.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    // POST /auth/register
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
-        return userService.registerUser(user);
+    public ResponseEntity<User> register(@RequestBody User user) {
+        User createdUser = userService.registerUser(user);
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    // POST /auth/login
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
-        return "JWT_TOKEN";
+    public ResponseEntity<String> login(@RequestBody User user) {
+        String token = "JWT_TOKEN";
+        return ResponseEntity.ok(token);
     }
 
-    // GET /auth/me
     @GetMapping("/me")
-    public User getCurrentUser() {
-        return new User("test@test.com", "secret", "TestUser");
+    public ResponseEntity<User> getCurrentUser() {
+        User user = new User("test@test.com", "secret", "TestUser");
+        return ResponseEntity.ok(user);
     }
 }
