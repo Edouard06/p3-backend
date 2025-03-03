@@ -1,5 +1,7 @@
 package com.openclassrooms.springsecurityauth.controller;
 
+import com.openclassrooms.springsecurityauth.dto.UserDTO;
+import com.openclassrooms.springsecurityauth.mapper.UserMapper;
 import com.openclassrooms.springsecurityauth.model.User;
 import com.openclassrooms.springsecurityauth.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -13,22 +15,26 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) {
+    public ResponseEntity<UserDTO> register(@RequestBody UserDTO userDTO) {
+        User user = userMapper.userDTOToUser(userDTO);
         User createdUser = userService.registerUser(user);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        UserDTO createdDTO = userMapper.userToUserDTO(createdUser);
+        return new ResponseEntity<>(createdDTO, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
+    public ResponseEntity<String> login(@RequestBody UserDTO userDTO) {
         String token = "JWT_TOKEN";
         return ResponseEntity.ok(token);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentUser() {
+    public ResponseEntity<UserDTO> getCurrentUser() {
         User user = new User("test@test.com", "secret", "TestUser");
-        return ResponseEntity.ok(user);
+        UserDTO userDTO = userMapper.userToUserDTO(user);
+        return ResponseEntity.ok(userDTO);
     }
 }
