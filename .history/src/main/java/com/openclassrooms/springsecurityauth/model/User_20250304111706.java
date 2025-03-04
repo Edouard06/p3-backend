@@ -21,12 +21,14 @@ public class User {
     private String password;
     private String username;
 
+    // Constructeur privé qui ne sera pas accessible en dehors de la classe
     private User(String email, String password, String username) {
         this.email = email;
         this.password = password;
         this.username = username;
     }
 
+    // Méthode factory pour créer un utilisateur
     public static User of(String email, String password, String username) {
         return new User(email, password, username);
     }

@@ -15,7 +15,8 @@ public class UserService {
 
     public User registerUser(User user) {
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
-        return userRepository.save(User.of(user.getEmail(), encryptedPassword, user.getUsername()));
+        user.setPassword(encryptedPassword);
+        return userRepository.save(user);
     }
     
     public User findByEmail(String email) {

@@ -33,7 +33,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getCurrentUser() {
-        User user = User.of("test@test.com", "secret", "TestUser");
+        User user = new User("test@test.com", "secret", "TestUser");
         UserDTO userDTO = userMapper.userToUserDTO(user);
         return ResponseEntity.ok(userDTO);
     }
