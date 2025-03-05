@@ -7,9 +7,11 @@ public class UserDTO {
     private String username;
     private String password;
 
+    // Constructeur sans arguments
     public UserDTO() {
     }
 
+    // Constructeur avec tous les arguments
     public UserDTO(Long id, String email, String username, String password) {
         this.id = id;
         this.email = email;
@@ -17,6 +19,7 @@ public class UserDTO {
         this.password = password;
     }
 
+    // Getters et Setters
     public Long getId() {
         return id;
     }

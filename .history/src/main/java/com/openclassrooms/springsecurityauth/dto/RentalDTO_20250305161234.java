@@ -9,9 +9,11 @@ public class RentalDTO {
     private float surface;
     private String picture;
 
+    // Constructeur sans arguments
     public RentalDTO() {
     }
 
+    // Constructeur avec tous les arguments
     public RentalDTO(Long id, String name, String description, float price, float surface, String picture) {
         this.id = id;
         this.name = name;
@@ -21,6 +23,7 @@ public class RentalDTO {
         this.picture = picture;
     }
 
+    // Getters et Setters
     public Long getId() {
         return id;
     }
