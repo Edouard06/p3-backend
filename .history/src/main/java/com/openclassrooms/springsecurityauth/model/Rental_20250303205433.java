@@ -17,8 +17,9 @@ public class Rental {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String description;
-    private Double price;
-    private Double surface;
+    private double surface;
+    private double price;
     private String picture;
+    private String description;
+    private Long ownerId;
 }

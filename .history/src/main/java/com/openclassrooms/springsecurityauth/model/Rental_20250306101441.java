@@ -21,4 +21,5 @@ public class Rental {
     private Double price;
     private Double surface;
     private String picture;
+    // Autres champs et méthodes si nécessaire
 }
