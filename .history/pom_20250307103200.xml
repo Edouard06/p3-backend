@@ -145,6 +145,7 @@
               <version>${lombok.mapstruct.binding.version}</version>
             </path>
           </annotationProcessorPaths>
+          <!-- Optionnel : activer le mode verbose de MapStruct pour le debug -->
           <compilerArgs>
             <arg>-Amapstruct.verbose=true</arg>
           </compilerArgs>

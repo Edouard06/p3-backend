@@ -16,8 +16,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    // Définition d'un PasswordEncoder pour encoder les mots de passe
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // Authentification en mémoire : création d'un InMemoryUserDetailsManager
     @Bean
     public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
+        // Par exemple, on crée un utilisateur "user" avec le rôle "USER"
         UserDetails user = User.withUsername("user")
                 .password(passwordEncoder.encode("password"))
                 .roles("USER")
@@ -25,6 +33,7 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager(user);
     }
 
+    // Configuration de la sécurité HTTP, y compris le formulaire de connexion
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -34,7 +43,7 @@ public class SecurityConfig {
             .anyRequest().authenticated()
             )
             .formLogin(form -> form
-                .loginPage("/auth/login")            
+                .loginPage("/auth/login")            // URL de la page de connexion personnalisée
                 .defaultSuccessUrl("/auth/me", true)   // Redirection après connexion réussie
                 .permitAll()
             )
