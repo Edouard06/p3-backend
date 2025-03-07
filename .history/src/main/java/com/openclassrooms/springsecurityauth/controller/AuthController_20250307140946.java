@@ -35,10 +35,12 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody UserDTO userDTO) {
+        // Logique de connexion et génération de token ici
         String token = "JWT_TOKEN";
         return ResponseEntity.ok(token);
     }
 
+    // Ajoutez une méthode GET pour /auth/login afin d'éviter les redirections infinies
     @GetMapping("/login")
     public ResponseEntity<String> loginPage() {
         return ResponseEntity.ok("Veuillez vous connecter en envoyant une requête POST à /auth/login avec vos identifiants.");
