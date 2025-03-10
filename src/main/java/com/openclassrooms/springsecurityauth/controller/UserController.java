@@ -7,7 +7,6 @@ import com.openclassrooms.springsecurityauth.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +18,6 @@ public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
 
-    // Récupérer la liste de tous les utilisateurs
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userService.getAllUsers();
@@ -29,7 +27,6 @@ public class UserController {
         return ResponseEntity.ok(dtos);
     }
 
-    // Récupérer un utilisateur par son identifiant
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
@@ -39,7 +36,6 @@ public class UserController {
         return ResponseEntity.ok(userMapper.userToUserDTO(user));
     }
 
-    // Mettre à jour un utilisateur
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
         User user = userMapper.userDTOToUser(userDTO);
@@ -47,7 +43,6 @@ public class UserController {
         return ResponseEntity.ok(userMapper.userToUserDTO(updatedUser));
     }
 
-    // Supprimer un utilisateur
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);

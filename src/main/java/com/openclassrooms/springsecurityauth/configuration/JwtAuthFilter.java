@@ -28,7 +28,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        // Exclure les endpoints d'authentification (login, register) du filtrage JWT
         return path.startsWith("/auth/login") || path.startsWith("/auth/register");
     }
 
