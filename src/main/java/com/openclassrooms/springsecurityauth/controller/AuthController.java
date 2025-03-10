@@ -48,29 +48,33 @@ public class AuthController {
      * 1) Inscription + génération de token
      */
     @PostMapping("/register")
-    public ResponseEntity<JWTToken> register(@Valid @RequestBody RegisterDTO registerDto)
-            throws UserAlreadyExistException {
-        logger.info("Début de la méthode register pour l'inscription de l'utilisateur : {}", registerDto.getEmail());
-        
+public ResponseEntity<JWTToken> register(@Valid @RequestBody RegisterDTO registerDto)
+        throws UserAlreadyExistException {
+    logger.info("Début de l'inscription pour l'utilisateur : {}", registerDto.getEmail());
+    
+    try {
         // 1) Création / sauvegarde du nouvel utilisateur
         userService.save(registerDto);
-
+    
         // 2) Authentification immédiate après inscription
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(registerDto.getEmail(), registerDto.getPassword());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
+    
         // 3) Génération du token JWT
         String jwt = tokenProvider.createToken(authentication);
-
+    
         // 4) Renvoi du token dans l'en-tête et dans le JSON
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(AUTHORIZATION_HEADER, "Bearer " + jwt);
         logger.info("Inscription et authentification réussies pour l'utilisateur : {}", registerDto.getEmail());
         return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
+    } catch (Exception e) {
+        logger.error("Erreur lors de l'inscription et de l'authentification pour l'utilisateur {}", registerDto.getEmail(), e);
+        throw e;
     }
-
+}
     /**
      * 2) Connexion (login) + génération de token
      */

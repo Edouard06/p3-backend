@@ -3,27 +3,36 @@ package com.openclassrooms.springsecurityauth.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import io.jsonwebtoken.security.Keys;
 import com.openclassrooms.springsecurityauth.service.CustomUserDetails;
+import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
+import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
 
 @Component
 public class JwtTokenUtil {
 
-    @Value("${jwt.secret}")
-    private String secret;
+    // Génère une clé sécurisée pour HS512 (512 bits ou plus)
+    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
-    @Value("${jwt.token.validity}")
-    private long tokenValidity;
+    // Durée de validité du token en millisecondes (ici 24 heures)
+    private long tokenValidity = 86400000;
+
+    @PostConstruct
+    public void init() {
+        // Log temporaire pour vérifier la taille de la clé
+        System.out.println("Taille de la clé (bits) : " + key.getEncoded().length * 8);
+    }
 
     public Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(secret.getBytes())
-                .parseClaimsJws(token)
-                .getBody();
+        return Jwts.parserBuilder()
+                   .setSigningKey(key)
+                   .build()
+                   .parseClaimsJws(token)
+                   .getBody();
     }
 
     public String getUserEmailFromToken(String token) {
@@ -41,12 +50,14 @@ public class JwtTokenUtil {
     }
 
     public String generateToken(CustomUserDetails userDetails) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + tokenValidity);
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + tokenValidity))
-                .signWith(SignatureAlgorithm.HS512, secret.getBytes())
-                .compact();
+                   .setSubject(userDetails.getUsername())
+                   .setIssuedAt(now)
+                   .setExpiration(expiryDate)
+                   .signWith(key)
+                   .compact();
     }
 
     public Boolean validateToken(String token, CustomUserDetails userDetails) {

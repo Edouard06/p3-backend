@@ -9,6 +9,7 @@ import com.openclassrooms.springsecurityauth.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,11 +17,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserDTO getUser(final int id) {
@@ -71,17 +74,17 @@ public class UserService {
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
-
+    
+    // Méthode d'inscription avec encodage du mot de passe
     public void save(RegisterDTO registerDto) throws UserAlreadyExistException {
-        // Vérifier si un utilisateur avec cet email existe déjà
         if (userRepository.findByEmail(registerDto.getEmail()) != null) {
             throw new UserAlreadyExistException("User with email " + registerDto.getEmail() + " already exists");
         }
-        // Création d'un nouvel utilisateur à partir des données de RegisterDTO
         User user = new User();
         user.setEmail(registerDto.getEmail());
-        user.setUsername(registerDto.getName()); // RegisterDTO doit fournir getName()
-        user.setPassword(registerDto.getPassword());
+        user.setUsername(registerDto.getName());
+        // Encodage du mot de passe
+        user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         userRepository.save(user);
     }
 }

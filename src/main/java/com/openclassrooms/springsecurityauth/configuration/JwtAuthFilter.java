@@ -9,7 +9,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.openclassrooms.springsecurityauth.security.JwtTokenUtil;
 import com.openclassrooms.springsecurityauth.service.CustomUserDetails;
 import com.openclassrooms.springsecurityauth.service.JwtUserDetailsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -18,6 +21,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
+    private static final String AUTHORIZATION_PREFIX = "Bearer ";
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
@@ -32,7 +38,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain chain)
             throws ServletException, IOException {
 
         final String requestTokenHeader = request.getHeader("Authorization");
@@ -40,15 +48,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String username = null;
         String jwtToken = null;
 
-        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-            jwtToken = requestTokenHeader.substring(7);
+        if (requestTokenHeader != null && requestTokenHeader.startsWith(AUTHORIZATION_PREFIX)) {
+            jwtToken = requestTokenHeader.substring(AUTHORIZATION_PREFIX.length());
             try {
                 username = jwtTokenUtil.getUserEmailFromToken(jwtToken);
             } catch (Exception e) {
-                System.out.println("Impossible de récupérer le JWT ou le token a expiré");
+                logger.error("Impossible de récupérer le JWT ou le token a expiré", e);
             }
         } else {
-            logger.warn("Le JWT ne commence pas par 'Bearer '");
+            logger.warn("Le JWT ne commence pas par '{}'", AUTHORIZATION_PREFIX);
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

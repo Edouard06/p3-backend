@@ -2,16 +2,17 @@ package com.openclassrooms.springsecurityauth.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.util.Date;
 
 @Component
 public class TokenProvider {
 
-    private final String JWT_SECRET = "39e387239f60b80aafcd7abbf1194b9aaa55c1eb";
-
+    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
     private final long JWT_EXPIRATION_MS = 86400000;
 
     public String createToken(Authentication authentication) {
@@ -23,8 +24,7 @@ public class TokenProvider {
                 .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
+                .signWith(key)  // Utilise la clé générée dynamiquement
                 .compact();
     }
-    
 }
