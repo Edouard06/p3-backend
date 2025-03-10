@@ -3,6 +3,7 @@ package com.openclassrooms.springsecurityauth.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import com.openclassrooms.springsecurityauth.service.CustomUserDetails;
 
@@ -12,7 +13,11 @@ import java.util.function.Function;
 @Component
 public class JwtTokenUtil {
 
-    private String secret = "YOUR_SECRET_KEY";
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.token.validity}")
+    private long tokenValidity;
 
     public Claims getAllClaimsFromToken(String token) {
         return Jwts.parser()
@@ -33,6 +38,15 @@ public class JwtTokenUtil {
     private Boolean isTokenExpired(String token) {
         final Date expiration = getClaimFromToken(token, Claims::getExpiration);
         return expiration.before(new Date());
+    }
+
+    public String generateToken(CustomUserDetails userDetails) {
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + tokenValidity))
+                .signWith(SignatureAlgorithm.HS512, secret.getBytes())
+                .compact();
     }
 
     public Boolean validateToken(String token, CustomUserDetails userDetails) {

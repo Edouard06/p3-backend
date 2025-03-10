@@ -17,11 +17,9 @@ public class User {
     private String password;
     private String username;
 
-    // Constructeur sans argument (requis par JPA)
     public User() {
     }
 
-    // Constructeur complet
     public User(Long id, String email, String password, String username) {
         this.id = id;
         this.email = email;
@@ -29,12 +27,10 @@ public class User {
         this.username = username;
     }
 
-    // Méthode de création statique, si besoin
     public static User of(String email, String password, String username) {
         return new User(null, email, password, username);
     }
 
-    // Getters et Setters
     public Long getId() {
         return id;
     }
