@@ -2,39 +2,33 @@ package com.openclassrooms.springsecurityauth.dto;
 
 public class MessageDTO {
     private String message;
-    private Integer user_id;
-    private Long rental_id;
+    private Long userId;
+    private Long rentalId;
 
-    public MessageDTO() {
-    }
+    public MessageDTO() {}
 
-    public MessageDTO(String message, Integer user_id, Long rental_id) {
+    public MessageDTO(String message, Long userId, Long rentalId) {
         this.message = message;
-        this.user_id = user_id;
-        this.rental_id = rental_id;
+        this.userId = userId;
+        this.rentalId = rentalId;
     }
 
     public String getMessage() {
         return message;
     }
-
     public void setMessage(String message) {
         this.message = message;
     }
-
-    public Integer getUser_id() {
-        return user_id;
+    public Long getUserId() {
+        return userId;
     }
-
-    public void setUser_id(Integer user_id) {
-        this.user_id = user_id;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
-
-    public Long getRental_id() {
-        return rental_id;
+    public Long getRentalId() {
+        return rentalId;
     }
-
-    public void setRental_id(Long rental_id) {
-        this.rental_id = rental_id;
+    public void setRentalId(Long rentalId) {
+        this.rentalId = rentalId;
     }
 }

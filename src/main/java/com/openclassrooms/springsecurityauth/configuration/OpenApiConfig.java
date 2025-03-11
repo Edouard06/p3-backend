@@ -14,6 +14,6 @@ public class OpenApiConfig {
             .info(new Info()
                 .title("Spring Security Auth API")
                 .version("1.0")
-                .description("Documentation de l'API pour le projet Spring Security Auth"));
+                .description("Documentation of API for the projet Spring Security Auth"));
     }
 }

@@ -17,7 +17,7 @@ public class ImageService {
 
     public String storeImage(MultipartFile file) {
         if (file.isEmpty()) {
-            throw new RuntimeException("Le fichier est vide");
+            throw new RuntimeException("File is empty");
         }
         try {
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
@@ -30,7 +30,7 @@ public class ImageService {
 
             return imageProperties.getBaseUrl() + fileName;
         } catch (IOException ex) {
-            throw new RuntimeException("Erreur lors de l'enregistrement de l'image " + file.getOriginalFilename(), ex);
+            throw new RuntimeException("Error while storing the image: " + file.getOriginalFilename(), ex);
         }
     }
 }

@@ -11,10 +11,9 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private Long rentalId;  
-    private Long userId;    
-    private String content; 
+    private Long rentalId;
+    private Long userId;
+    private String content;
 
     public Message() {}
 
@@ -24,15 +23,25 @@ public class Message {
         this.content = content;
     }
 
-    // Getters / Setters
-    public Long getId() { return id; }
-
-    public Long getRentalId() { return rentalId; }
-    public void setRentalId(Long rentalId) { this.rentalId = rentalId; }
-
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
-
-    public String getMessage() { return content; }
-    public void setMessage(String content) { this.content = content; }
+    public Long getId() {
+        return id;
+    }
+    public Long getRentalId() {
+        return rentalId;
+    }
+    public void setRentalId(Long rentalId) {
+        this.rentalId = rentalId;
+    }
+    public Long getUserId() {
+        return userId;
+    }
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+    public String getContent() {
+        return content;
+    }
+    public void setContent(String content) {
+        this.content = content;
+    }
 }

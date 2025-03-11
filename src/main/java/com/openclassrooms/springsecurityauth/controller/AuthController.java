@@ -48,7 +48,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<JWTToken> register(@Valid @RequestBody RegisterDTO registerDto)
             throws UserAlreadyExistException {
-        logger.info("Début de l'inscription pour l'utilisateur : {}", registerDto.getEmail());
+        logger.info("Starting registration process for user: {}", registerDto.getEmail());
         try {
             userService.save(registerDto);
 
@@ -62,17 +62,17 @@ public class AuthController {
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add(AUTHORIZATION_HEADER, "Bearer " + jwt);
-            logger.info("Inscription et authentification réussies pour l'utilisateur : {}", registerDto.getEmail());
+            logger.info("Registration and authentication successful for user: {}", registerDto.getEmail());
             return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
         } catch (Exception e) {
-            logger.error("Erreur lors de l'inscription et de l'authentification pour l'utilisateur {}", registerDto.getEmail(), e);
+            logger.error("Error during registration and authentication for user: {}", registerDto.getEmail(), e);
             throw e;
         }
     }
 
     @PostMapping("/login")
     public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginDTO loginDTO) {
-        logger.info("Début de la méthode authorize pour la connexion de l'utilisateur : {}", loginDTO.getEmail());
+        logger.info("Starting login process for user: {}", loginDTO.getEmail());
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword());
@@ -83,13 +83,13 @@ public class AuthController {
         String jwt = jwtTokenUtil.generateToken(customUserDetails);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(AUTHORIZATION_HEADER, "Bearer " + jwt);
-        logger.info("Authentification réussie pour l'utilisateur : {}", loginDTO.getEmail());
+        logger.info("Login successful for user: {}", loginDTO.getEmail());
         return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserDTO> currentUserName(Authentication authentication) {
-        logger.info("Récupération de l'utilisateur courant pour : {}", authentication.getName());
+        logger.info("Fetching current user details for: {}", authentication.getName());
         String email = authentication.getName();
         UserDTO userDto = userService.getUserByEmail(email);
         return ResponseEntity.ok(userDto);
@@ -97,7 +97,7 @@ public class AuthController {
 
     @ExceptionHandler({UserAlreadyExistException.class})
     public ResponseEntity<Map<String, String>> handleUserAlreadyExistException(UserAlreadyExistException ex) {
-        logger.error("Erreur lors de l'inscription : {}", ex.getMessage());
+        logger.error("Registration error: {}", ex.getMessage());
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
@@ -105,7 +105,7 @@ public class AuthController {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        logger.error("Erreur de validation : {}", ex.getMessage());
+        logger.error("Validation error: {}", ex.getMessage());
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
@@ -117,9 +117,9 @@ public class AuthController {
 
     @ExceptionHandler({Exception.class})
     public ResponseEntity<Map<String, String>> handleAllExceptions(Exception ex) {
-        logger.error("Erreur interne : {}", ex.getMessage());
+        logger.error("Internal server error: {}", ex.getMessage());
         Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Une erreur interne s'est produite.");
+        errorResponse.put("error", "An internal server error occurred.");
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
