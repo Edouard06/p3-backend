@@ -15,9 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Controller for managing rental operations.
- */
+
 @RestController
 @RequestMapping("/rentals")
 @RequiredArgsConstructor
@@ -31,7 +29,7 @@ public class RentalController {
      * Creates a new rental with an associated image.
      *
      * @param rentalDTO the rental data (excluding image URL)
-     * @param image the image file to upload
+     * @param image 
      * @return the created rental with the image URL set
      */
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -39,7 +37,6 @@ public class RentalController {
             @RequestPart("rental") RentalDTO rentalDTO,
             @RequestPart("image") MultipartFile image) {
 
-        // Stockage de l'image et récupération de l'URL
         String imageUrl = imageService.storeImage(image);
         rentalDTO.setPicture(imageUrl);
 

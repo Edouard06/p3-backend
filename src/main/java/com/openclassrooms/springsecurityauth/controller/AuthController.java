@@ -50,16 +50,13 @@ public class AuthController {
             throws UserAlreadyExistException {
         logger.info("Début de l'inscription pour l'utilisateur : {}", registerDto.getEmail());
         try {
-            // Sauvegarde de l'utilisateur
             userService.save(registerDto);
 
-            // Authentification immédiate
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(registerDto.getEmail(), registerDto.getPassword());
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Récupérer CustomUserDetails à partir de l'authentification et générer le token
             CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
             String jwt = jwtTokenUtil.generateToken(customUserDetails);
 
@@ -126,7 +123,6 @@ public class AuthController {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // Classe interne pour renvoyer le token dans la réponse JSON
     static class JWTToken {
         private String idToken;
 

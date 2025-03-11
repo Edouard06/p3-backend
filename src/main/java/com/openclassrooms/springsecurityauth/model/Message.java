@@ -13,8 +13,8 @@ public class Message {
     private Long id;
 
     private Long rentalId;  
-    private Long userId;    // l'id user envoie message
-    private String content; // contenu message
+    private Long userId;    
+    private String content; 
 
     public Message() {}
 

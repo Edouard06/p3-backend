@@ -2,7 +2,6 @@ package com.openclassrooms.springsecurityauth.service;
 
 import com.openclassrooms.springsecurityauth.model.Rental;
 import com.openclassrooms.springsecurityauth.repository.RentalRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,8 +10,11 @@ import java.util.Optional;
 @Service
 public class RentalService {
 
-    @Autowired
-    private RentalRepository rentalRepository;
+    private final RentalRepository rentalRepository;
+
+    public RentalService(RentalRepository rentalRepository) {
+        this.rentalRepository = rentalRepository;
+    }
 
     public Rental createRental(Rental rental) {
         return rentalRepository.save(rental);
@@ -35,9 +37,9 @@ public class RentalService {
             existingRental.setPrice(rentalData.getPrice());
             existingRental.setPicture(rentalData.getPicture());
             existingRental.setDescription(rentalData.getDescription());
-            
+
             return rentalRepository.save(existingRental);
         }
-        return null; 
+        return null;
     }
 }

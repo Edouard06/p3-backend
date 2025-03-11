@@ -75,7 +75,6 @@ public class UserService {
         userRepository.deleteById(id);
     }
     
-    // Méthode d'inscription avec encodage du mot de passe
     public void save(RegisterDTO registerDto) throws UserAlreadyExistException {
         if (userRepository.findByEmail(registerDto.getEmail()) != null) {
             throw new UserAlreadyExistException("User with email " + registerDto.getEmail() + " already exists");
@@ -83,7 +82,6 @@ public class UserService {
         User user = new User();
         user.setEmail(registerDto.getEmail());
         user.setUsername(registerDto.getName());
-        // Encodage du mot de passe
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         userRepository.save(user);
     }
