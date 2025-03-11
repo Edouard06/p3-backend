@@ -23,9 +23,8 @@ http://localhost:8080
 API Documentation
 The API documentation is automatically generated and can be accessed at the following URL:
 
-http://localhost:3001/v2/api-docs
+http://localhost:8080/swagger-ui/index.html
 
-Author
 This project was created by Edouard Della-monica. You can contact the author via email at:
 
 Email: edouard.dm@outlook/fr
