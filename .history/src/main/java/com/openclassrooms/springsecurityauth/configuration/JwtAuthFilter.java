@@ -42,7 +42,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String username = null;
         String jwtToken = null;
 
-        // Le token JWT doit être de la forme "Bearer <token>"
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
             try {
@@ -55,12 +54,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             logger.warn("JWT Token does not begin with Bearer String");
         }
 
-        // Si nous avons pu extraire un username et que le contexte de sécurité est vide...
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Récupérer les détails de l'utilisateur via ton service personnalisé
             CustomUserDetails userDetails = this.jwtUserDetailsService.loadUserByUserEmail(username);
 
-            // Si le token est valide, configurer l'authentification manuellement dans le contexte
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

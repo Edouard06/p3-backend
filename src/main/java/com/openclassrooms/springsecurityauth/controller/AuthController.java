@@ -5,8 +5,9 @@ import com.openclassrooms.springsecurityauth.dto.LoginDTO;
 import com.openclassrooms.springsecurityauth.dto.RegisterDTO;
 import com.openclassrooms.springsecurityauth.dto.UserDTO;
 import com.openclassrooms.springsecurityauth.exceptions.UserAlreadyExistException;
+import com.openclassrooms.springsecurityauth.service.CustomUserDetails;
 import com.openclassrooms.springsecurityauth.service.UserService;
-import com.openclassrooms.springsecurityauth.security.TokenProvider;
+import com.openclassrooms.springsecurityauth.security.JwtTokenUtil;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,77 +27,69 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "*") // ou spécifie l'URL de ton front
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
-    private final TokenProvider tokenProvider;
+    private final JwtTokenUtil jwtTokenUtil;
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
 
-    public AuthController(TokenProvider tokenProvider,
+    public AuthController(JwtTokenUtil jwtTokenUtil,
                           AuthenticationManager authenticationManager,
                           UserService userService) {
-        this.tokenProvider = tokenProvider;
+        this.jwtTokenUtil = jwtTokenUtil;
         this.authenticationManager = authenticationManager;
         this.userService = userService;
     }
 
-    /**
-     * 1) Inscription + génération de token
-     */
     @PostMapping("/register")
-public ResponseEntity<JWTToken> register(@Valid @RequestBody RegisterDTO registerDto)
-        throws UserAlreadyExistException {
-    logger.info("Début de l'inscription pour l'utilisateur : {}", registerDto.getEmail());
-    
-    try {
-        // 1) Création / sauvegarde du nouvel utilisateur
-        userService.save(registerDto);
-    
-        // 2) Authentification immédiate après inscription
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(registerDto.getEmail(), registerDto.getPassword());
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    
-        // 3) Génération du token JWT
-        String jwt = tokenProvider.createToken(authentication);
-    
-        // 4) Renvoi du token dans l'en-tête et dans le JSON
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(AUTHORIZATION_HEADER, "Bearer " + jwt);
-        logger.info("Inscription et authentification réussies pour l'utilisateur : {}", registerDto.getEmail());
-        return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
-    } catch (Exception e) {
-        logger.error("Erreur lors de l'inscription et de l'authentification pour l'utilisateur {}", registerDto.getEmail(), e);
-        throw e;
+    public ResponseEntity<JWTToken> register(@Valid @RequestBody RegisterDTO registerDto)
+            throws UserAlreadyExistException {
+        logger.info("Début de l'inscription pour l'utilisateur : {}", registerDto.getEmail());
+        try {
+            // Sauvegarde de l'utilisateur
+            userService.save(registerDto);
+
+            // Authentification immédiate
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(registerDto.getEmail(), registerDto.getPassword());
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Récupérer CustomUserDetails à partir de l'authentification et générer le token
+            CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+            String jwt = jwtTokenUtil.generateToken(customUserDetails);
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(AUTHORIZATION_HEADER, "Bearer " + jwt);
+            logger.info("Inscription et authentification réussies pour l'utilisateur : {}", registerDto.getEmail());
+            return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'inscription et de l'authentification pour l'utilisateur {}", registerDto.getEmail(), e);
+            throw e;
+        }
     }
-}
-    /**
-     * 2) Connexion (login) + génération de token
-     */
+
     @PostMapping("/login")
     public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginDTO loginDTO) {
         logger.info("Début de la méthode authorize pour la connexion de l'utilisateur : {}", loginDTO.getEmail());
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword());
-        Authentication authentication = this.authenticationManager.authenticate(authenticationToken);
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = tokenProvider.createToken(authentication);
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        String jwt = jwtTokenUtil.generateToken(customUserDetails);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(AUTHORIZATION_HEADER, "Bearer " + jwt);
         logger.info("Authentification réussie pour l'utilisateur : {}", loginDTO.getEmail());
         return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
     }
 
-    /**
-     * 3) Récupération de l’utilisateur courant (via token)
-     */
     @GetMapping("/me")
     public ResponseEntity<UserDTO> currentUserName(Authentication authentication) {
         logger.info("Récupération de l'utilisateur courant pour : {}", authentication.getName());
@@ -104,8 +97,6 @@ public ResponseEntity<JWTToken> register(@Valid @RequestBody RegisterDTO registe
         UserDTO userDto = userService.getUserByEmail(email);
         return ResponseEntity.ok(userDto);
     }
-
-    // Gestion centralisée des exceptions spécifiques à ce contrôleur
 
     @ExceptionHandler({UserAlreadyExistException.class})
     public ResponseEntity<Map<String, String>> handleUserAlreadyExistException(UserAlreadyExistException ex) {

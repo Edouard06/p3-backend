@@ -1,67 +1,84 @@
 package com.openclassrooms.springsecurityauth.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.openclassrooms.springsecurityauth.service.CustomUserDetails;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import java.security.Key;
 import java.util.Date;
-import java.util.function.Function;
 
+/**
+ * Utilitaire pour la gestion des tokens JWT en utilisant la bibliothèque Auth0.
+ */
 @Component
 public class JwtTokenUtil {
 
-    // Génère une clé sécurisée pour HS512 (512 bits ou plus)
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
-    // Durée de validité du token en millisecondes (ici 24 heures)
-    private long tokenValidity = 86400000;
+    @Value("${jwt.token.validity}")
+    private long tokenValidity; 
 
-    @PostConstruct
-    public void init() {
-        // Log temporaire pour vérifier la taille de la clé
-        System.out.println("Taille de la clé (bits) : " + key.getEncoded().length * 8);
+    /**
+     * Vérifie la validité d'un token JWT et retourne l'objet DecodedJWT.
+     *
+     * @param token 
+     * @return 
+     */
+    public DecodedJWT verifyToken(String token) {
+        // Création de l'algorithme avec la clé secrète
+        Algorithm algorithm = Algorithm.HMAC512(jwtSecret);
+        // Crée le vérificateur de token
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        // Vérifie et décode le token
+        return verifier.verify(token);
     }
 
-    public Claims getAllClaimsFromToken(String token) {
-        return Jwts.parserBuilder()
-                   .setSigningKey(key)
-                   .build()
-                   .parseClaimsJws(token)
-                   .getBody();
-    }
-
+    /**
+     * Extrait l'email (subject) du token JWT.
+     *
+     * @param token 
+     * @return 
+     */
     public String getUserEmailFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+        return verifyToken(token).getSubject();
     }
 
-    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = getAllClaimsFromToken(token);
-        return claimsResolver.apply(claims);
-    }
-
-    private Boolean isTokenExpired(String token) {
-        final Date expiration = getClaimFromToken(token, Claims::getExpiration);
-        return expiration.before(new Date());
-    }
-
+    /**
+     * Génère un token JWT pour un utilisateur donné.
+     *
+     * @param userDetails 
+     * @return le token JWT généré
+     */
     public String generateToken(CustomUserDetails userDetails) {
+        Algorithm algorithm = Algorithm.HMAC512(jwtSecret);
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + tokenValidity);
-        return Jwts.builder()
-                   .setSubject(userDetails.getUsername())
-                   .setIssuedAt(now)
-                   .setExpiration(expiryDate)
-                   .signWith(key)
-                   .compact();
+        return JWT.create()
+                .withSubject(userDetails.getUsername())
+                .withIssuedAt(now)
+                .withExpiresAt(expiryDate)
+                .sign(algorithm);
     }
 
-    public Boolean validateToken(String token, CustomUserDetails userDetails) {
-        final String username = getUserEmailFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    /**
+     * Valide le token en vérifiant son subject et sa date d'expiration.
+     *
+     * @param token 
+     * @param userDetails 
+     * @return true si le token est valide, false sinon
+     */
+    public boolean validateToken(String token, CustomUserDetails userDetails) {
+        try {
+            DecodedJWT jwt = verifyToken(token);
+            String username = jwt.getSubject();
+            Date expiration = jwt.getExpiresAt();
+            return username.equals(userDetails.getUsername()) && expiration.after(new Date());
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
