@@ -27,7 +27,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "*")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -50,6 +49,7 @@ public class AuthController {
             throws UserAlreadyExistException {
         logger.info("Starting registration process for user: {}", registerDto.getEmail());
         try {
+            // Le service gère la conversion interne entre RegisterDTO et User
             userService.save(registerDto);
 
             UsernamePasswordAuthenticationToken authenticationToken =
@@ -91,6 +91,7 @@ public class AuthController {
     public ResponseEntity<UserDTO> currentUserName(Authentication authentication) {
         logger.info("Fetching current user details for: {}", authentication.getName());
         String email = authentication.getName();
+        // Le service renvoie directement un DTO
         UserDTO userDto = userService.getUserByEmail(email);
         return ResponseEntity.ok(userDto);
     }
