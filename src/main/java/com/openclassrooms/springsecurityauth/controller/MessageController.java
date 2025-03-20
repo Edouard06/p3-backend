@@ -2,11 +2,15 @@ package com.openclassrooms.springsecurityauth.controller;
 
 import com.openclassrooms.springsecurityauth.model.Message;
 import com.openclassrooms.springsecurityauth.service.MessageService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping("/messages")
+@SecurityRequirement(name = "Bearer Authentication") // ← On précise ici que ce contrôleur requiert un JWT
 public class MessageController {
 
     private final MessageService messageService;

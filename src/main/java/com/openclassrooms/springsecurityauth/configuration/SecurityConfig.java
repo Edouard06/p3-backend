@@ -37,9 +37,21 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-            .requestMatchers("/auth/**").permitAll()
-                .anyRequest().authenticated())
+                // Autoriser les endpoints de Swagger UI et la doc OpenAPI
+                .requestMatchers(
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",         // dépend de votre version de Springdoc
+                    "/v3/api-docs/**"         // ou "/v3/api-docs" selon la config
+                ).permitAll()
+                // Autoriser vos endpoints d’authentification
+                .requestMatchers("/auth/**").permitAll()
+                // Tout le reste nécessite une authentification
+                .anyRequest().authenticated()
+            )
+            // N’oubliez pas d’insérer votre filtre JWT avant UsernamePasswordAuthenticationFilter
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    
         return http.build();
     }
 }
+    

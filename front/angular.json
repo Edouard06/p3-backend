@@ -67,11 +67,12 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "browserTarget": "project-name:build",
-            "proxyConfig": "src/proxy.config.json"
-          },
+  "builder": "@angular-devkit/build-angular:dev-server",
+  "options": {
+    "browserTarget": "estate:build",
+    "proxyConfig": "src/proxy.config.json"
+  },
+
           "configurations": {
             "production": {
               "browserTarget": "estate:build:production"
@@ -122,6 +123,7 @@
   "cli": {
     "schematicCollections": [
       "@angular-eslint/schematics"
-    ]
+    ],
+    "analytics": "5eec8be5-4042-43d8-83ef-85eabf89ddc5"
   }
 }

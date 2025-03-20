@@ -5,6 +5,8 @@ import com.openclassrooms.springsecurityauth.mapper.RentalMapper;
 import com.openclassrooms.springsecurityauth.model.Rental;
 import com.openclassrooms.springsecurityauth.service.ImageService;
 import com.openclassrooms.springsecurityauth.service.RentalService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/rentals")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication") // ← On précise ici que ce contrôleur requiert un JWT
 public class RentalController {
 
     private final RentalService rentalService;
