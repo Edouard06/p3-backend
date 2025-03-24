@@ -1,6 +1,7 @@
 package com.openclassrooms.springsecurityauth.controller;
 
 import com.openclassrooms.springsecurityauth.dto.RentalDTO;
+import com.openclassrooms.springsecurityauth.dto.RentalCreateDTO;
 import com.openclassrooms.springsecurityauth.mapper.RentalMapper;
 import com.openclassrooms.springsecurityauth.model.Rental;
 import com.openclassrooms.springsecurityauth.service.ImageService;
@@ -12,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,30 +27,23 @@ public class RentalController {
     private final RentalMapper rentalMapper;
     private final ImageService imageService;
 
-    /**
-     * Creates a new rental.
-     * The FormData must include text fields with keys: name, description, price, surface,
-     * and a file with key "picture".
-     */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RentalDTO> createRental(
-            @ModelAttribute RentalDTO rentalDTO,
+            @ModelAttribute RentalCreateDTO rentalDTO,
             @RequestPart("picture") MultipartFile picture) {
+
+        Rental rental = rentalMapper.rentalCreateDTOToRental(rentalDTO);
 
         if (picture != null && !picture.isEmpty()) {
             String imageUrl = imageService.storeImage(picture);
-            rentalDTO.setPictureUrl(imageUrl);
+            rental.setPicture(imageUrl);
         }
 
-        Rental rental = rentalMapper.rentalDTOToRental(rentalDTO);
         Rental savedRental = rentalService.createRental(rental);
         RentalDTO savedDTO = rentalMapper.rentalToRentalDTO(savedRental);
         return new ResponseEntity<>(savedDTO, HttpStatus.CREATED);
     }
 
-    /**
-     * Gets all rentals.
-     */
     @GetMapping
     public ResponseEntity<List<RentalDTO>> getAllRentals() {
         List<Rental> rentals = rentalService.getAllRentals();
@@ -58,13 +53,10 @@ public class RentalController {
         return ResponseEntity.ok(dtos);
     }
 
-    /**
-     * Gets a rental by its ID.
-     */
     @GetMapping("/{id}")
     public ResponseEntity<RentalDTO> getRental(@PathVariable Long id) {
         return rentalService.getRental(id)
-                .map(rental -> ResponseEntity.ok(rentalMapper.rentalToRentalDTO(rental)))
+                .map(r -> ResponseEntity.ok(rentalMapper.rentalToRentalDTO(r)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
