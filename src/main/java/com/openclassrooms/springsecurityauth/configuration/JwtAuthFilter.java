@@ -36,7 +36,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      * Constructeur avec injection des dépendances.
      *
      * @param jwtUserDetailsService le service pour charger les détails de l'utilisateur
-     * @param jwtTokenUtil l'utilitaire de gestion du token JWT
+     * @param jwtTokenUtil 
      */
     public JwtAuthFilter(JwtUserDetailsService jwtUserDetailsService, JwtTokenUtil jwtTokenUtil) {
         this.jwtUserDetailsService = jwtUserDetailsService;
@@ -44,11 +44,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        // Exclure les endpoints de connexion et d'inscription du filtrage
-        String path = request.getRequestURI();
-        return path.startsWith("/auth/login") || path.startsWith("/auth/register");
-    }
+protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    String path = request.getRequestURI();
+    return path.startsWith("/auth/login") ||
+           path.startsWith("/auth/register") ||
+           path.startsWith("/images/") ||
+           path.startsWith("/rentals/test-images");
+}
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -61,7 +63,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (requestTokenHeader != null && requestTokenHeader.startsWith(AUTHORIZATION_PREFIX)) {
             jwtToken = requestTokenHeader.substring(AUTHORIZATION_PREFIX.length());
             try {
-                // Vérifie le token et extrait le username
                 DecodedJWT jwt = jwtTokenUtil.verifyToken(jwtToken);
                 username = jwtTokenUtil.getUserEmailFromToken(jwtToken);
             } catch (Exception e) {

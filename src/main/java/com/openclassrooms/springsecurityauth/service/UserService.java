@@ -6,11 +6,14 @@ import com.openclassrooms.springsecurityauth.exceptions.UserAlreadyExistExceptio
 import com.openclassrooms.springsecurityauth.mapper.UserMapper;
 import com.openclassrooms.springsecurityauth.model.User;
 import com.openclassrooms.springsecurityauth.repository.UserRepository;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -36,7 +39,7 @@ public class UserService {
         User user = userRepository.findByEmail(email);
         return user != null ? userMapper.userToUserDTO(user) : null;
     }
-    
+
     public void updateUsername(int id, String newUsername) {
         Optional<User> optionalUser = userRepository.findById(Long.valueOf(id));
         if (optionalUser.isPresent()) {
@@ -45,23 +48,23 @@ public class UserService {
             userRepository.save(user);
         }
     }
-    
+
     public User saveUser(User user) {
         return userRepository.save(user);
     }
-    
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-    
+
     public User getUserById(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         return optionalUser.orElse(null);
     }
-    
+
     public User updateUser(Long id, User updatedUser) {
         Optional<User> optionalUser = userRepository.findById(id);
-        if(optionalUser.isPresent()) {
+        if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             user.setEmail(updatedUser.getEmail());
             user.setUsername(updatedUser.getUsername());
@@ -70,11 +73,11 @@ public class UserService {
         }
         return null;
     }
-    
+
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
-    
+
     public void save(RegisterDTO registerDto) throws UserAlreadyExistException {
         if (userRepository.findByEmail(registerDto.getEmail()) != null) {
             throw new UserAlreadyExistException("User with email " + registerDto.getEmail() + " already exists");
@@ -84,5 +87,17 @@ public class UserService {
         user.setUsername(registerDto.getName());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         userRepository.save(user);
+    }
+
+    // ✅ Méthode pour obtenir l’utilisateur courant (entité)
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        return userRepository.findByEmail(email);
+    }
+
+    // ✅ Méthode pour obtenir l’utilisateur courant sous forme de DTO
+    public UserDTO getCurrentUserDTO() {
+        return userMapper.userToUserDTO(getCurrentUser());
     }
 }

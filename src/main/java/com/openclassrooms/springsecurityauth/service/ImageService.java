@@ -1,36 +1,31 @@
 package com.openclassrooms.springsecurityauth.service;
 
-import com.openclassrooms.springsecurityauth.configuration.ImageProperties;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class ImageService {
 
-    private final ImageProperties imageProperties;
+    @Value("${upload.images.dir}")
+    private String uploadDir;
 
-    public String storeImage(MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new RuntimeException("File is empty");
+    public String saveImage(MultipartFile file) throws IOException {
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
         }
-        try {
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
-            Path targetLocation = Paths.get(imageProperties.getImageDir()).resolve(fileName);
+        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path filePath = uploadPath.resolve(filename);
+        Files.copy(file.getInputStream(), filePath);
 
-            Files.createDirectories(targetLocation.getParent());
-
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
-            return imageProperties.getBaseUrl() + fileName;
-        } catch (IOException ex) {
-            throw new RuntimeException("Error while storing the image: " + file.getOriginalFilename(), ex);
-        }
+        return "/images/" + filename;
     }
 }

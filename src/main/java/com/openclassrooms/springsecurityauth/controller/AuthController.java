@@ -88,13 +88,11 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> currentUserName(Authentication authentication) {
-        logger.info("Fetching current user details for: {}", authentication.getName());
-        String email = authentication.getName();
-        // Le service renvoie directement un DTO
-        UserDTO userDto = userService.getUserByEmail(email);
-        return ResponseEntity.ok(userDto);
+    public ResponseEntity<UserDTO> currentUser() {
+        UserDTO currentUser = userService.getCurrentUserDTO();
+        return ResponseEntity.ok(currentUser);
     }
+    
 
     @ExceptionHandler({UserAlreadyExistException.class})
     public ResponseEntity<Map<String, String>> handleUserAlreadyExistException(UserAlreadyExistException ex) {

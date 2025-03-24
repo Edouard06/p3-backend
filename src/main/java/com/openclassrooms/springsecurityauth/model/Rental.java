@@ -4,6 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Column;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
@@ -14,11 +17,16 @@ public class Rental {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
     private String description;
     private Double price;
     private Double surface;
     private String picture;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
 
     // Getters and Setters
     public Long getId() {
@@ -69,6 +77,14 @@ public class Rental {
         this.picture = picture;
     }
 
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
     // toString()
     @Override
     public String toString() {
@@ -79,6 +95,7 @@ public class Rental {
                 ", price=" + price +
                 ", surface=" + surface +
                 ", picture='" + picture + '\'' +
+                ", owner=" + (owner != null ? owner.getId() : null) +
                 '}';
     }
 
