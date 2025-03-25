@@ -3,12 +3,12 @@ package com.openclassrooms.springsecurityauth.dto;
 public class RentalCreateDTO {
     private String name;
     private String description;
-    private float price;
-    private float surface;
+    private Double price;
+    private Double surface;
 
     public RentalCreateDTO() {}
 
-    public RentalCreateDTO(String name, String description, float price, float surface) {
+    public RentalCreateDTO(String name, String description, Double price, Double surface) {
         this.name = name;
         this.description = description;
         this.price = price;
@@ -21,9 +21,9 @@ public class RentalCreateDTO {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public float getPrice() { return price; }
-    public void setPrice(float price) { this.price = price; }
+    public Double getPrice() { return price; }
+    public void setPrice(Double price) { this.price = price; }
 
-    public float getSurface() { return surface; }
-    public void setSurface(float surface) { this.surface = surface; }
+    public Double getSurface() { return surface; }
+    public void setSurface(Double surface) { this.surface = surface; }
 }

@@ -5,14 +5,14 @@ public class RentalDTO {
     private Long id;
     private String name;
     private String description;
-    private float price;
-    private float surface;
+    private Double price;
+    private Double surface;
     private String picture;
     private Long ownerId;
 
     public RentalDTO() {}
 
-    public RentalDTO(Long id, String name, String description, float price, float surface, String picture, Long ownerId) {
+    public RentalDTO(Long id, String name, String description, Double price, Double surface, String picture, Long ownerId) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -46,19 +46,19 @@ public class RentalDTO {
         this.description = description;
     }
 
-    public float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public float getSurface() {
+    public Double getSurface() {
         return surface;
     }
 
-    public void setSurface(float surface) {
+    public void setSurface(Double surface) {
         this.surface = surface;
     }
 
