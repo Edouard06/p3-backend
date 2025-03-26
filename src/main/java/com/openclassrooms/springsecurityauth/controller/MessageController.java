@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/messages")
+@RequestMapping("/api/messages")
 @SecurityRequirement(name = "Bearer Authentication") // ← On précise ici que ce contrôleur requiert un JWT
 public class MessageController {
 
