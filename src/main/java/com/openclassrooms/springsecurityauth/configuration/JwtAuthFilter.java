@@ -56,24 +56,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain chain) throws ServletException, IOException {
+                                     HttpServletResponse response,
+                                     FilterChain chain) throws ServletException, IOException {
         final String requestTokenHeader = request.getHeader("Authorization");
         String username = null;
         String jwtToken = null;
-
-        if (requestTokenHeader != null && requestTokenHeader.startsWith(AUTHORIZATION_PREFIX)) {
-            jwtToken = requestTokenHeader.substring(AUTHORIZATION_PREFIX.length());
+    
+        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+            jwtToken = requestTokenHeader.substring(7);
             try {
                 DecodedJWT jwt = jwtTokenUtil.verifyToken(jwtToken);
                 username = jwtTokenUtil.getUserEmailFromToken(jwtToken);
+                logger.info("JWT Token valid for user: {}", username);  // Ajoutez des logs pour vérifier l'extraction du JWT
             } catch (Exception e) {
                 logger.error("Unable to get JWT Token or JWT Token has expired", e);
             }
         } else {
             logger.warn("JWT Token does not begin with Bearer String");
         }
-
+    
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             CustomUserDetails userDetails = jwtUserDetailsService.loadUserByUserEmail(username);
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
@@ -85,4 +86,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         chain.doFilter(request, response);
     }
+    
 }
