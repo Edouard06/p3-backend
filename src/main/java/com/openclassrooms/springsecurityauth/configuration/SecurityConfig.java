@@ -37,16 +37,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers(
-                    "/swagger-ui.html",
-                    "/swagger-ui/**",         
-                    "/v3/api-docs/**",
-                    "/images/**",
-                    "/rentals/test-images", 
-                    "/api/messages/**",
-                    "/api/user**",
-                    "api/rentals/**"
-                ).permitAll()
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/images/**").permitAll()
+                .requestMatchers("/api/user/**").authenticated()  // Protéger l'accès à /api/user/**
                 .requestMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated()
             )
@@ -54,6 +46,8 @@ public class SecurityConfig {
     
         return http.build();
     }
-    
 }
+
+    
+
     

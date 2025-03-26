@@ -18,11 +18,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * Filter that intercepts HTTP requests to verify the JWT token.
- * It extracts the token from the Authorization header, vérifie sa validité,
- * et si tout est OK, configure l'authentification dans le SecurityContext.
- */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -32,12 +27,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtUserDetailsService jwtUserDetailsService;
     private final JwtTokenUtil jwtTokenUtil;
 
-    /**
-     * Constructeur avec injection des dépendances.
-     *
-     * @param jwtUserDetailsService le service pour charger les détails de l'utilisateur
-     * @param jwtTokenUtil 
-     */
     public JwtAuthFilter(JwtUserDetailsService jwtUserDetailsService, JwtTokenUtil jwtTokenUtil) {
         this.jwtUserDetailsService = jwtUserDetailsService;
         this.jwtTokenUtil = jwtTokenUtil;
@@ -49,10 +38,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         return path.startsWith("/auth/login") ||
                path.startsWith("/auth/register") ||
                path.startsWith("/images/") ||
-               path.startsWith("/rentals/test-images") ||
-               path.startsWith("/api/user");  
+               path.startsWith("/rentals/test-images");
+            //    path.startsWith("/api/user");
     }
-    
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -61,20 +49,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String requestTokenHeader = request.getHeader("Authorization");
         String username = null;
         String jwtToken = null;
-    
-        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-            jwtToken = requestTokenHeader.substring(7);
+
+        if (requestTokenHeader != null && requestTokenHeader.startsWith(AUTHORIZATION_PREFIX)) {
+            jwtToken = requestTokenHeader.substring(AUTHORIZATION_PREFIX.length());
             try {
                 DecodedJWT jwt = jwtTokenUtil.verifyToken(jwtToken);
                 username = jwtTokenUtil.getUserEmailFromToken(jwtToken);
-                logger.info("JWT Token valid for user: {}", username);  // Ajoutez des logs pour vérifier l'extraction du JWT
+                logger.info("JWT Token valid for user: {}", username);
             } catch (Exception e) {
                 logger.error("Unable to get JWT Token or JWT Token has expired", e);
             }
         } else {
             logger.warn("JWT Token does not begin with Bearer String");
         }
-    
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             CustomUserDetails userDetails = jwtUserDetailsService.loadUserByUserEmail(username);
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
@@ -82,9 +70,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                logger.info("Authentication successful for user: {}", username);
             }
         }
+
         chain.doFilter(request, response);
     }
-    
 }
