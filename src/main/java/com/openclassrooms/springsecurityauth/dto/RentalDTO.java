@@ -1,5 +1,7 @@
 package com.openclassrooms.springsecurityauth.dto;
 
+import java.time.LocalDateTime;
+
 public class RentalDTO {
 
     private Long id;
@@ -9,10 +11,12 @@ public class RentalDTO {
     private Double surface;
     private String picture;
     private Long ownerId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public RentalDTO() {}
 
-    public RentalDTO(Long id, String name, String description, Double price, Double surface, String picture, Long ownerId) {
+    public RentalDTO(Long id, String name, String description, Double price, Double surface, String picture, Long ownerId, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -20,6 +24,8 @@ public class RentalDTO {
         this.surface = surface;
         this.picture = picture;
         this.ownerId = ownerId;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Long getId() {
@@ -76,5 +82,21 @@ public class RentalDTO {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
