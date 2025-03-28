@@ -40,11 +40,11 @@ public class UserService {
         return user != null ? userMapper.userToUserDTO(user) : null;
     }
 
-    public void updateUsername(int id, String newUsername) {
+    public void updateName(int id, String newName) {
         Optional<User> optionalUser = userRepository.findById(Long.valueOf(id));
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            user.setUsername(newUsername);
+            user.setName(newName);
             userRepository.save(user);
         }
     }
@@ -67,7 +67,7 @@ public class UserService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             user.setEmail(updatedUser.getEmail());
-            user.setUsername(updatedUser.getUsername());
+            user.setName(updatedUser.getName());
             user.setPassword(updatedUser.getPassword());
             return userRepository.save(user);
         }
@@ -84,7 +84,7 @@ public class UserService {
         }
         User user = new User();
         user.setEmail(registerDto.getEmail());
-        user.setUsername(registerDto.getName());
+        user.setName(registerDto.getName());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         userRepository.save(user);
     }

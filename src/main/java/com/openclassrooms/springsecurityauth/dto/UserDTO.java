@@ -6,12 +6,10 @@ public class UserDTO {
 
     private Long id;
     private String email;
-    private String username;
+    private String name;
     private String password;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    // Getters & Setters
 
     public Long getId() {
         return id;
@@ -29,12 +27,12 @@ public class UserDTO {
         this.email = email;
     }
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPassword() {

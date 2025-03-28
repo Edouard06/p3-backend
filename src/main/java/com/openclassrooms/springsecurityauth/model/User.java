@@ -15,7 +15,7 @@ public class User {
     private Long id;
 
     private String email;
-    private String username;
+    private String name;
     private String password;
 
     @CreationTimestamp
@@ -25,8 +25,6 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    // Getters & Setters
 
     public Long getId() {
         return id;
@@ -44,12 +42,12 @@ public class User {
         this.email = email;
     }
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPassword() {
