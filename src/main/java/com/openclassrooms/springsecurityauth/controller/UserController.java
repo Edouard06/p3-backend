@@ -13,9 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -25,102 +22,79 @@ public class UserController {
     private final UserMapper userMapper;
 
     /**
-     * Récupère tous les utilisateurs.
-     *
-     * @return Liste des utilisateurs
+     * Get the currently authenticated user.
      */
-    // @GetMapping
-    // public ResponseEntity<List<UserDTO>> getAllUsers() {
-    //     List<User> users = userService.getAllUsers();
-    //     List<UserDTO> dtos = users.stream()
-    //             .map(userMapper::userToUserDTO)
-    //             .collect(Collectors.toList());
-    //     return ResponseEntity.ok(dtos);
-    // }
     @GetMapping
-public ResponseEntity<UserDTO> getCurrentUser() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+    public ResponseEntity<UserDTO> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-    User user = userService.getUserById(userDetails.getId());
-    if (user == null) {
-        return ResponseEntity.notFound().build();  // Si l'utilisateur n'existe pas
+        User user = userService.getUserById(userDetails.getId());
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(userMapper.userToUserDTO(user));
     }
 
-    return ResponseEntity.ok(userMapper.userToUserDTO(user));
-}
-
-
     /**
-     * Récupère un utilisateur par son identifiant. Seul l'utilisateur authentifié peut accéder à ses informations.
-     *
-     * @param id Identifiant de l'utilisateur
-     * @return Détails de l'utilisateur
+     * Get a user by their ID.
+     * Only the user themselves can access their data.
      */
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-        // Vérifier que l'utilisateur est authentifié et que l'utilisateur qui fait la requête est bien autorisé
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        
-        // Vérification que l'utilisateur authentifié est bien celui qui fait la demande ou est un administrateur
+
+        // Only allow access if the authenticated user matches the requested ID
         if (userDetails != null && userDetails.getId().equals(id)) {
             User user = userService.getUserById(id);
             if (user == null) {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.ok(userMapper.userToUserDTO(user));
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();  // Retour 403 si l'utilisateur tente d'accéder à un autre utilisateur
         }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     /**
-     * Met à jour un utilisateur. Seul l'utilisateur authentifié peut mettre à jour ses propres informations.
-     *
-     * @param id L'identifiant de l'utilisateur
-     * @param userDTO Les nouvelles informations de l'utilisateur
-     * @return L'utilisateur mis à jour
+     * Update a user.
+     * Only the authenticated user can update their own data.
      */
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
-        // Récupérer l'utilisateur authentifié
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        // Vérifier si l'utilisateur authentifié est bien celui qui tente de mettre à jour ses propres informations
         if (!userDetails.getId().equals(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // L'utilisateur n'est pas autorisé
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        // Si l'utilisateur est authentifié et est le bon, on procède à la mise à jour
         User user = userMapper.userDTOToUser(userDTO);
         User updatedUser = userService.updateUser(id, user);
-        
+
         if (updatedUser == null) {
-            return ResponseEntity.notFound().build(); // Si l'utilisateur n'a pas été trouvé
+            return ResponseEntity.notFound().build();
         }
 
         return ResponseEntity.ok(userMapper.userToUserDTO(updatedUser));
     }
 
     /**
-     * Supprime un utilisateur. Seul un administrateur ou l'utilisateur lui-même peut supprimer son compte.
-     *
-     * @param id L'identifiant de l'utilisateur
-     * @return Confirmation de suppression
+     * Delete a user account.
+     * Only the user themselves can delete their account.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        // Vérifier si l'utilisateur authentifié est bien celui qui tente de supprimer son compte
         if (userDetails.getId().equals(id)) {
             userService.deleteUser(id);
             return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();  // Retour 403 si l'utilisateur tente de supprimer un autre compte
         }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 }

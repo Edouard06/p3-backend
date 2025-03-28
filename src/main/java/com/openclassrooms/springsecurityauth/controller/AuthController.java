@@ -44,64 +44,56 @@ public class AuthController {
         this.userService = userService;
     }
 
+    // Handles user registration, auto-login, and JWT generation
     @PostMapping("/register")
     public ResponseEntity<JWTToken> register(@Valid @RequestBody RegisterDTO registerDto)
             throws UserAlreadyExistException {
         logger.info("Starting registration process for user: {}", registerDto.getEmail());
-        try {
-            // Le service gère la conversion interne entre RegisterDTO et User
-            userService.save(registerDto);
 
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(registerDto.getEmail(), registerDto.getPassword());
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        userService.save(registerDto);
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(registerDto.getEmail(), registerDto.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-            String jwt = jwtTokenUtil.generateToken(customUserDetails);
+        String jwt = jwtTokenUtil.generateToken((CustomUserDetails) authentication.getPrincipal());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(AUTHORIZATION_HEADER, "Bearer " + jwt);
 
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add(AUTHORIZATION_HEADER, "Bearer " + jwt);
-            logger.info("Registration and authentication successful for user: {}", registerDto.getEmail());
-            return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error("Error during registration and authentication for user: {}", registerDto.getEmail(), e);
-            throw e;
-        }
+        logger.info("Registration and authentication successful for user: {}", registerDto.getEmail());
+        return new ResponseEntity<>(new JWTToken(jwt), headers, HttpStatus.OK);
     }
 
+    // Handles user login and JWT generation
     @PostMapping("/login")
     public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginDTO loginDTO) {
         logger.info("Starting login process for user: {}", loginDTO.getEmail());
 
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword());
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        String jwt = jwtTokenUtil.generateToken(customUserDetails);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(AUTHORIZATION_HEADER, "Bearer " + jwt);
+        String jwt = jwtTokenUtil.generateToken((CustomUserDetails) authentication.getPrincipal());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(AUTHORIZATION_HEADER, "Bearer " + jwt);
+
         logger.info("Login successful for user: {}", loginDTO.getEmail());
-        return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(new JWTToken(jwt), headers, HttpStatus.OK);
     }
 
+    // Get currently authenticated user info
     @GetMapping("/me")
     public ResponseEntity<UserDTO> currentUser() {
-        UserDTO currentUser = userService.getCurrentUserDTO();
-        return ResponseEntity.ok(currentUser);
+        return ResponseEntity.ok(userService.getCurrentUserDTO());
     }
-    
 
+    // Handle duplicate user registration exception
     @ExceptionHandler({UserAlreadyExistException.class})
     public ResponseEntity<Map<String, String>> handleUserAlreadyExistException(UserAlreadyExistException ex) {
         logger.error("Registration error: {}", ex.getMessage());
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.CONFLICT);
     }
 
+    // Handle validation errors
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         logger.error("Validation error: {}", ex.getMessage());
@@ -114,14 +106,14 @@ public class AuthController {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
+    // Handle general server errors
     @ExceptionHandler({Exception.class})
     public ResponseEntity<Map<String, String>> handleAllExceptions(Exception ex) {
         logger.error("Internal server error: {}", ex.getMessage());
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "An internal server error occurred.");
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(Map.of("error", "An internal server error occurred."), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    // Inner class for token response payload
     static class JWTToken {
         private String idToken;
 

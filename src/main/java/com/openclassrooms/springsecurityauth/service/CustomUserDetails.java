@@ -8,6 +8,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * Custom implementation of Spring Security's UserDetails interface,
+ * used to provide user authentication and authorization data.
+ */
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
@@ -16,6 +20,10 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
+    /**
+     * Returns the user's roles.
+     * Currently, all users have ROLE_USER.
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
@@ -33,24 +41,27 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return true; // Always active
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return true; // Never locked
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return true; // Always valid
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return true; // Always enabled
     }
 
+    /**
+     * Custom method to expose the User's ID.
+     */
     public Long getId() {
         return user.getId();
     }

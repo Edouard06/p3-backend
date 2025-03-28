@@ -12,6 +12,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Configures custom JSON serialization and static resource handling.
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
@@ -23,19 +26,23 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/resources/**")
-                .addResourceLocations("classpath:/static/")
-                .setCachePeriod(3600);
+        registry
+            .addResourceHandler("/resources/**")
+            .addResourceLocations("classpath:/static/")
+            .setCachePeriod(3600);
     }
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
+        MappingJackson2HttpMessageConverter converter =
+            new MappingJackson2HttpMessageConverter(objectMapper);
+
         converter.setSupportedMediaTypes(Arrays.asList(
-                MediaType.APPLICATION_JSON,
-                MediaType.APPLICATION_OCTET_STREAM,
-                MediaType.MULTIPART_FORM_DATA
+            MediaType.APPLICATION_JSON,
+            MediaType.APPLICATION_OCTET_STREAM,
+            MediaType.MULTIPART_FORM_DATA
         ));
+
         converters.add(converter);
     }
 }

@@ -32,48 +32,61 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
+    /**
+     * Bypass the filter for public endpoints (e.g., login, registration, static assets).
+     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         return path.startsWith("/auth/login") ||
                path.startsWith("/auth/register") ||
-               path.startsWith("/images/") ||
-               path.startsWith("/rentals/test-images");
-            //    path.startsWith("/api/user");
+               path.startsWith("/images/");
     }
 
+    /**
+     * Filter to authenticate user based on JWT token in the Authorization header.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                     HttpServletResponse response,
-                                     FilterChain chain) throws ServletException, IOException {
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
+
         final String requestTokenHeader = request.getHeader("Authorization");
         String username = null;
         String jwtToken = null;
 
+        // Check if the Authorization header contains a Bearer token
         if (requestTokenHeader != null && requestTokenHeader.startsWith(AUTHORIZATION_PREFIX)) {
             jwtToken = requestTokenHeader.substring(AUTHORIZATION_PREFIX.length());
             try {
+                // Validate and decode the token
                 DecodedJWT jwt = jwtTokenUtil.verifyToken(jwtToken);
                 username = jwtTokenUtil.getUserEmailFromToken(jwtToken);
                 logger.info("JWT Token valid for user: {}", username);
             } catch (Exception e) {
-                logger.error("Unable to get JWT Token or JWT Token has expired", e);
+                logger.error("Invalid or expired JWT token", e);
             }
         } else {
-            logger.warn("JWT Token does not begin with Bearer String");
+            logger.warn("Authorization header missing or malformed");
         }
 
+        // Set authentication context if token is valid and no authentication exists
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             CustomUserDetails userDetails = jwtUserDetailsService.loadUserByUserEmail(username);
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
                 UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 logger.info("Authentication successful for user: {}", username);
             }
         }
 
+        // Continue filter chain
         chain.doFilter(request, response);
     }
 }
