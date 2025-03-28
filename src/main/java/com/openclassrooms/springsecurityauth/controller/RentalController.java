@@ -105,10 +105,4 @@ public class RentalController {
         rentalService.deleteRental(id);
         return ResponseEntity.noContent().build(); // 204 en cas de suppression réussie
     }
-
-    @GetMapping("/test-images")
-    public List<String> testImages() {
-        File folder = new File("/home/edouard/uploads/images/");
-        return folder.exists() ? Arrays.asList(Objects.requireNonNull(folder.list())) : List.of("Dossier introuvable");
-    }
 }

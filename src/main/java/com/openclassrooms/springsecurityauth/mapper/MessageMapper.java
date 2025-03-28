@@ -9,8 +9,12 @@ import org.mapstruct.Mapping;
 public interface MessageMapper {
 
     @Mapping(source = "content", target = "message")
+    @Mapping(source = "userId", target = "userId")
+    @Mapping(source = "rentalId", target = "rentalId")
     MessageDTO toDto(Message message);
 
     @Mapping(source = "message", target = "content")
+    @Mapping(source = "userId", target = "userId")
+    @Mapping(source = "rentalId", target = "rentalId")
     Message toEntity(MessageDTO dto);
 }

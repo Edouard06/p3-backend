@@ -1,37 +1,29 @@
 package com.openclassrooms.springsecurityauth.controller;
 
+import com.openclassrooms.springsecurityauth.dto.MessageDTO;
+import com.openclassrooms.springsecurityauth.mapper.MessageMapper;
 import com.openclassrooms.springsecurityauth.model.Message;
 import com.openclassrooms.springsecurityauth.service.MessageService;
-
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
-@RequestMapping("/api/messages")
-@SecurityRequirement(name = "Bearer Authentication") // ← On précise ici que ce contrôleur requiert un JWT
+@RequestMapping("/messages")
+@SecurityRequirement(name = "Bearer Authentication")
 public class MessageController {
 
     private final MessageService messageService;
+    private final MessageMapper messageMapper;
 
-    /**
-     * Constructs a new MessageController with the provided MessageService.
-     *
-     * @param messageService 
-     */
-    public MessageController(MessageService messageService) {
+    public MessageController(MessageService messageService, MessageMapper messageMapper) {
         this.messageService = messageService;
+        this.messageMapper = messageMapper;
     }
 
-    /**
-     * Creates a new message.
-     *
-     * @param message 
-     * @return 
-     */
-    @PostMapping("/message")
-    public Message createMessage(@RequestBody Message message) {
-        return messageService.createMessage(message);
+    @PostMapping
+    public MessageDTO createMessage(@RequestBody MessageDTO dto) {
+        Message message = messageMapper.toEntity(dto);
+        Message saved = messageService.createMessage(message);
+        return messageMapper.toDto(saved);
     }
 }

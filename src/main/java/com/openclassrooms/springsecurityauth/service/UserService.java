@@ -89,14 +89,12 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // ✅ Méthode pour obtenir l’utilisateur courant (entité)
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         return userRepository.findByEmail(email);
     }
 
-    // ✅ Méthode pour obtenir l’utilisateur courant sous forme de DTO
     public UserDTO getCurrentUserDTO() {
         return userMapper.userToUserDTO(getCurrentUser());
     }
