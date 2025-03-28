@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { map } from 'rxjs/operators';
 import { User } from 'src/app/interfaces/user.interface';
 import { SessionService } from 'src/app/services/session.service';
 import { RentalsService } from '../../services/rentals.service';
@@ -8,14 +10,24 @@ import { RentalsService } from '../../services/rentals.service';
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.scss']
 })
-export class ListComponent {
+export class ListComponent implements OnInit {
 
-  public rentals$ = this.rentalsService.all();
+  public rentals$ = this.rentalsService.all().pipe(
+    map(response => ({
+      rentals: response.rentals.map(rental => ({
+        ...rental,
+        picture: this.sanitizer.bypassSecurityTrustResourceUrl(rental.picture)
+      }))
+    }))
+  );
 
   constructor(
     private sessionService: SessionService,
-    private rentalsService: RentalsService
+    private rentalsService: RentalsService,
+    private sanitizer: DomSanitizer
   ) { }
+
+  ngOnInit(): void {}
 
   get user(): User | undefined {
     return this.sessionService.user;
